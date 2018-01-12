@@ -14,7 +14,7 @@ var runSequence = require('run-sequence')
 
 var sources = {
   pages: ['src/app/*.html'],
-  scripts: ['src/app/main.ts'],
+  scripts: ['src/app/*.ts', 'src/app/**/*.ts'],
   styles: ['src/app/assets/styles/*.scss'],
   assets: ['src/app/assets/*']
 }
