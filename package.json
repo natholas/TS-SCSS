@@ -15,20 +15,19 @@
     "browserify": "^14.4.0",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^4.0.0",
-    "gulp-clean-css": "^3.9.0",
     "gulp-sass": "^3.1.0",
     "gulp-sourcemaps": "^2.6.1",
     "gulp-typescript": "^3.2.2",
     "gulp-uglify": "^3.0.0",
-    "gulp-util": "^3.0.8",
+    "run-sequence": "^2.2.1",
     "tsify": "^3.0.3",
     "typescript": "^2.5.2",
     "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.9.0"
+    "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
     "del": "^3.0.0",
+    "gulp-uglifycss": "^1.0.9",
     "requirejs": "^2.3.5"
   }
 }

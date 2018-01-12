@@ -5,50 +5,54 @@ var tsify = require('tsify')
 var sourcemaps = require('gulp-sourcemaps')
 var buffer = require('vinyl-buffer')
 var browserSync = require('browser-sync').create()
-var cleanCss = require('gulp-clean-css')
 var sass = require('gulp-sass')
 var autoprefixer = require('gulp-autoprefixer')
 var del = require('del')
+var uglifycss = require('gulp-uglifycss')
+var uglify = require('gulp-uglify')
+var runSequence = require('run-sequence')
 
-var paths = {
+var sources = {
   pages: ['src/app/*.html'],
   scripts: ['src/app/main.ts'],
   styles: ['src/app/assets/styles/*.scss'],
   assets: ['src/app/assets/*']
 }
 
+var dest = './dist'
+
 gulp.task('clean-build-folder', function () {
-  return del(['build/*']);
-});
+  return del([dest + '/*'])
+})
 
 
 gulp.task('browser-sync', ['browserify', 'copyHtml', 'sass', 'copyAssets'], function () {
   browserSync.init({
     server: {
-      baseDir: "./build"
+      baseDir: dest
     }
   })
 })
 
 gulp.task('copyHtml', function () {
-  return gulp.src(paths.pages)
-    .pipe(gulp.dest('build'))
+  return gulp.src(sources.pages)
+    .pipe(gulp.dest(dest))
 })
 
 gulp.task('copyAssets', function () {
-  return gulp.src(paths.assets)
-    .pipe(gulp.dest('build/assets'))
+  return gulp.src(sources.assets)
+    .pipe(gulp.dest(dest + '/assets'))
 })
 
 gulp.task('sass', function () {
-  return gulp.src(paths.styles)
+  return gulp.src(sources.styles)
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
     .pipe(autoprefixer({
       browsers: ['last 2 versions']
     }))
     .pipe(sourcemaps.write())
-    .pipe(gulp.dest('build'))
+    .pipe(gulp.dest(dest))
     .pipe(browserSync.stream())
 })
 
@@ -56,7 +60,7 @@ gulp.task('browserify', function () {
   return browserify({
     basedir: '.',
     debug: true,
-    entries: paths.scripts,
+    entries: 'src/app/main.ts',
     cache: {},
     packageCache: {}
   })
@@ -71,7 +75,7 @@ gulp.task('browserify', function () {
     .pipe(buffer())
     .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('build'))
+    .pipe(gulp.dest(dest))
 })
 
 gulp.task('test', function() {
@@ -91,12 +95,47 @@ gulp.task('watch-assets', ['copyAssets'], function () {
 })
 
 gulp.task('watchers', ['browser-sync'], function () {
-  gulp.watch(paths.pages, ['watch-html'])
-  gulp.watch(paths.scripts, ['watch-ts'])
-  gulp.watch(paths.styles, ['sass'])
-  gulp.watch(paths.assets, ['watch-assets'])
+  gulp.watch(sources.pages, ['watch-html'])
+  gulp.watch(sources.scripts, ['watch-ts'])
+  gulp.watch(sources.styles, ['sass'])
+  gulp.watch(sources.assets, ['watch-assets'])
 })
 
 gulp.task('default', ['clean-build-folder'], function() {
   gulp.start('watchers')
+})
+
+gulp.task('build-tasks', ['browserify', 'copyHtml', 'sass', 'copyAssets'])
+
+gulp.task('optimization-tasks', ['uglifyCss', 'uglyfyJS'])
+
+gulp.task('build', function () {
+  
+  runSequence(
+    'clean-build-folder',
+    'build-tasks'
+  )
+})
+
+gulp.task('build-dist', function () {
+  runSequence(
+    'clean-build-folder',
+    'build-tasks',
+    'optimization-tasks'
+  )
+})
+
+gulp.task('uglifyCss', function () {
+  return gulp.src(dest + '/*.css')
+    .pipe(uglifycss({
+      "maxLineLen": 80,
+      "uglyComments": true
+    }))
+    .pipe(gulp.dest(dest));
+})
+
+gulp.task('uglyfyJS', function () {
+  return gulp.src(dest + '/*.js')
+    .pipe(uglify())
+    .pipe(gulp.dest(dest));
 })
