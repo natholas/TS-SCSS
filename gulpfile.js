@@ -117,7 +117,7 @@ gulp.task('build', function () {
   )
 })
 
-gulp.task('build-dist', function () {
+gulp.task('build-prod', function () {
   runSequence(
     'clean-build-folder',
     'build-tasks',
