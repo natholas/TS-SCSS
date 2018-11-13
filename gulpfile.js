@@ -1,62 +1,65 @@
-var gulp = require('gulp')
-var browserify = require('browserify')
-var source = require('vinyl-source-stream')
-var tsify = require('tsify')
-var sourcemaps = require('gulp-sourcemaps')
-var buffer = require('vinyl-buffer')
-var browserSync = require('browser-sync').create()
-var sass = require('gulp-sass')
-var autoprefixer = require('gulp-autoprefixer')
-var del = require('del')
-var uglifycss = require('gulp-uglifycss')
-var uglify = require('gulp-uglify')
-var runSequence = require('run-sequence')
+const gulp = require('gulp')
+const browserify = require('browserify')
+const source = require('vinyl-source-stream')
+const tsify = require('tsify')
+const sourcemaps = require('gulp-sourcemaps')
+const buffer = require('vinyl-buffer')
+const browserSync = require('browser-sync').create()
+const sass = require('gulp-sass')
+const autoprefixer = require('gulp-autoprefixer')
+const del = require('del')
+const uglifycss = require('gulp-uglifycss')
+const uglify = require('gulp-uglify')
+const runSequence = require('run-sequence')
 
-var sources = {
+const port = 3030
+
+const sources = {
   pages: ['src/app/*.html'],
   scripts: ['src/app/*.ts', 'src/app/**/*.ts'],
   styles: ['src/app/assets/styles/*.scss'],
   assets: ['src/app/assets/*']
 }
 
-var dest = './dist'
+const dest = './dist'
 
-gulp.task('clean-build-folder', function () {
+gulp.task('clean-build-folder', () => {
   return del([dest + '/*'])
 })
 
 
-gulp.task('browser-sync', ['browserify', 'copyHtml', 'sass', 'copyAssets'], function () {
+gulp.task('browser-sync', ['browserify', 'copyHtml', 'sass', 'copyAssets'], () => {
   browserSync.init({
+    port: port,
     server: {
-      baseDir: dest
+      baseDir: dest,
     }
   })
 })
 
-gulp.task('copyHtml', function () {
+gulp.task('copyHtml', () => {
   return gulp.src(sources.pages)
     .pipe(gulp.dest(dest))
 })
 
-gulp.task('copyAssets', function () {
+gulp.task('copyAssets', () => {
   return gulp.src(sources.assets)
     .pipe(gulp.dest(dest + '/assets'))
 })
 
-gulp.task('sass', function () {
+gulp.task('sass', () => {
   return gulp.src(sources.styles)
-    .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
-    .pipe(autoprefixer({
-      browsers: ['last 2 versions']
-    }))
-    .pipe(sourcemaps.write())
-    .pipe(gulp.dest(dest))
-    .pipe(browserSync.stream())
+  .pipe(sourcemaps.init())
+  .pipe(sass().on('error', sass.logError))
+  .pipe(autoprefixer({
+    browsers: ['last 2 versions']
+  }))
+  .pipe(sourcemaps.write())
+  .pipe(gulp.dest(dest))
+  .pipe(browserSync.stream())
 })
 
-gulp.task('browserify', function () {
+gulp.task('browserify', () => {
   return browserify({
     basedir: '.',
     debug: true,
@@ -64,44 +67,40 @@ gulp.task('browserify', function () {
     cache: {},
     packageCache: {}
   })
-    .plugin(tsify)
-    .transform('babelify', {
-      presets: ['es2015'],
-      extensions: ['.ts']
-    })
-    .bundle()
-    .on('error', console.error.bind(console))
-    .pipe(source('script.js'))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest(dest))
+  .plugin(tsify)
+  .transform('babelify', {
+    presets: ['es2015'],
+    extensions: ['.ts']
+  })
+  .bundle()
+  .on('error', console.error)
+  .pipe(source('script.js'))
+  .pipe(buffer())
+  .pipe(sourcemaps.init({ loadMaps: true }))
+  .pipe(sourcemaps.write('./'))
+  .pipe(gulp.dest(dest))
 })
 
-gulp.task('test', function() {
-  console.log("test")
-})
-
-gulp.task('watch-ts', ['browserify'], function () {
+gulp.task('watch-ts', ['browserify'], () => {
   browserSync.reload()
 })
 
-gulp.task('watch-html', ['copyHtml'], function () {
+gulp.task('watch-html', ['copyHtml'], () => {
   browserSync.reload()
 })
 
-gulp.task('watch-assets', ['copyAssets'], function () {
+gulp.task('watch-assets', ['copyAssets'], () => {
   browserSync.reload()
 })
 
-gulp.task('watchers', ['browser-sync'], function () {
+gulp.task('watchers', ['browser-sync'], () => {
   gulp.watch(sources.pages, ['watch-html'])
   gulp.watch(sources.scripts, ['watch-ts'])
   gulp.watch(sources.styles, ['sass'])
   gulp.watch(sources.assets, ['watch-assets'])
 })
 
-gulp.task('default', ['clean-build-folder'], function() {
+gulp.task('default', ['clean-build-folder'], () => {
   gulp.start('watchers')
 })
 
@@ -109,15 +108,7 @@ gulp.task('build-tasks', ['browserify', 'copyHtml', 'sass', 'copyAssets'])
 
 gulp.task('optimization-tasks', ['uglifyCss', 'uglyfyJS'])
 
-gulp.task('build', function () {
-  
-  runSequence(
-    'clean-build-folder',
-    'build-tasks'
-  )
-})
-
-gulp.task('build-prod', function () {
+gulp.task('build-prod', () => {
   runSequence(
     'clean-build-folder',
     'build-tasks',
@@ -125,17 +116,17 @@ gulp.task('build-prod', function () {
   )
 })
 
-gulp.task('uglifyCss', function () {
+gulp.task('uglifyCss', () => {
   return gulp.src(dest + '/*.css')
-    .pipe(uglifycss({
-      "maxLineLen": 80,
-      "uglyComments": true
-    }))
-    .pipe(gulp.dest(dest));
+  .pipe(uglifycss({
+    "maxLineLen": 80,
+    "uglyComments": true
+  }))
+  .pipe(gulp.dest(dest))
 })
 
-gulp.task('uglyfyJS', function () {
+gulp.task('uglyfyJS', () => {
   return gulp.src(dest + '/*.js')
-    .pipe(uglify())
-    .pipe(gulp.dest(dest));
+  .pipe(uglify())
+  .pipe(gulp.dest(dest))
 })

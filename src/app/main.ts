@@ -1,4 +1,4 @@
-import { ExternalClass } from './external.class'
-const test = new ExternalClass('Import is working!!')
+// import { ExternalClass } from './external.class'
+// const test: ExternalClass = new ExternalClass('Import is working!!')
 
-console.log(test.message)
+// console.log(test.message)

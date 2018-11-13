@@ -1,5 +1,5 @@
 # TS-SCSS
-A basic gulp setup that includes gulp, ts &amp; scss with browsersync
+A basic gulp setup that includes gulp, TypeScript &amp; scss with browsersync
 
 use "gulp" to start building the project and start a browsersync server
 
